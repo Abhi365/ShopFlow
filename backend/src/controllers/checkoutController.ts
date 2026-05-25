@@ -74,7 +74,7 @@ export async function initiateCheckout(req: Request, res: Response): Promise<voi
  * POST /api/checkout/confirm
  * Called from frontend after Stripe.confirmPayment() resolves.
  * Sends confirmation email and returns order summary.
- * SFP-173
+ * SFP-22 — single-page checkout flow: confirmation step with email notification.
  */
 export async function confirmCheckout(req: Request, res: Response): Promise<void> {
   const { paymentIntentId } = req.body as { paymentIntentId: string };
