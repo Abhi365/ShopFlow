@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Cart } from '../models/Cart';
 import { Order } from '../models/Order';
 import { createPaymentIntent } from '../services/stripeService';
+import { sendOrderConfirmationEmail } from '../services/emailService';
 import { z } from 'zod';
 
 const ShippingAddressSchema = z.object({
@@ -85,8 +86,20 @@ export async function confirmCheckout(req: Request, res: Response): Promise<void
     return;
   }
 
-  // TODO [SFP-173]: send order confirmation email via SendGrid
-  // await sendOrderConfirmationEmail(order);
+  // SFP-173: send order confirmation email via SendGrid
+  await sendOrderConfirmationEmail({
+    orderId: order.id as string,
+    userEmail: req.user!.email ?? req.user!.sub,
+    total: order.total,
+    currency: order.currency,
+    items: order.items.map((i) => ({
+      title: i.title,
+      sku: i.sku,
+      quantity: i.quantity,
+      price: i.price,
+    })),
+    shippingAddress: order.shippingAddress as any,
+  });
 
   res.json({
     message: 'Order confirmed',
